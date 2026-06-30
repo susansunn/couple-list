@@ -1,0 +1,16 @@
+{
+  "name": "我们的小差事",
+  "short_name": "小差事",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffaf1",
+  "theme_color": "#6d8a79",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#6d8a79" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="小差事" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <title>我们的小差事</title>
+  <style>
+    :root {
+      --ink: #292521;
+      --muted: #776f66;
+      --line: #ddd4c7;
+      --paper: #fffaf1;
+      --panel: #ffffff;
+      --mist: #edf5f2;
+      --sage: #6d8a79;
+      --rose: #c97878;
+      --gold: #bd8438;
+      --blue: #5f7f9b;
+      --shadow: 0 18px 45px rgba(55, 46, 35, .13);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(120deg, rgba(237, 245, 242, .88), rgba(255, 250, 241, .94) 46%, rgba(247, 232, 218, .9)),
+        var(--paper);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-end;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .subtle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      border-radius: var(--radius);
+      padding: 0 14px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: inset 0 0 0 1px var(--line);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 0 1px #cbbdad, 0 10px 22px rgba(55, 46, 35, .08);
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: var(--sage);
+      box-shadow: none;
+    }
+
+    .btn.warn {
+      color: #fff;
+      background: var(--rose);
+      box-shadow: none;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .composer,
+    .share-panel {
+      background: rgba(255, 255, 255, .82);
+      border: 1px solid rgba(221, 212, 199, .82);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .composer {
+      padding: 18px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 11px;
+      color: var(--ink);
+      background: #fffdf9;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(109, 138, 121, .18);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      min-height: 34px;
+      padding: 0 11px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .68);
+      box-shadow: inset 0 0 0 1px rgba(221, 212, 199, .9);
+    }
+
+    .chip.active {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: none;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .column {
+      min-height: 460px;
+      background: rgba(255, 255, 255, .54);
+      border: 1px solid rgba(221, 212, 199, .72);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .column header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .column h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .count {
+      min-width: 28px;
+      height: 26px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #fffaf1;
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 10px;
+    }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(221, 212, 199, .88);
+      box-shadow: 0 10px 24px rgba(55, 46, 35, .08);
+    }
+
+    .card.done {
+      opacity: .58;
+    }
+
+    .card-top {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: #f8f3eb;
+      box-shadow: inset 0 0 0 1px rgba(221, 212, 199, .8);
+    }
+
+    .icon-btn:hover {
+      color: var(--ink);
+      background: #fff7e9;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #f6f1ea;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .pill.owner {
+      color: #fff;
+      background: var(--sage);
+    }
+
+    .pill.due {
+      color: #fff;
+      background: var(--gold);
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .status-select {
+      min-height: 36px;
+      padding: 7px 9px;
+      font-size: 13px;
+    }
+
+    .empty {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      border: 1px dashed #d5c9bb;
+      border-radius: var(--radius);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      background: rgba(255, 250, 241, .48);
+      font-size: 14px;
+    }
+
+    dialog {
+      width: min(560px, calc(100% - 28px));
+      border: 0;
+      border-radius: var(--radius);
+      padding: 0;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    dialog::backdrop {
+      background: rgba(41, 37, 33, .34);
+      backdrop-filter: blur(4px);
+    }
+
+    .share-panel {
+      padding: 18px;
+    }
+
+    .share-panel textarea {
+      min-height: 140px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      max-width: min(420px, calc(100% - 32px));
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      color: #fff;
+      background: rgba(41, 37, 33, .92);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      text-align: center;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 920px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .composer {
+        position: static;
+      }
+
+      .columns {
+        grid-template-columns: 1fr;
+      }
+
+      .column {
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100% - 22px, 1180px);
+        padding-top: 18px;
+      }
+
+      .row,
+      .card-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .top-actions,
+      .dialog-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div class="brand">
+        <h1>我们的小差事</h1>
+        <p class="subtle">把想去、想买、想提醒对方的事，都放在一个两个人看得见的小地方。</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="shareButton" type="button" title="生成可以发给对方的链接">分享</button>
+        <button class="btn" id="importButton" type="button" title="粘贴对方发来的内容">导入</button>
+        <button class="btn warn" id="resetButton" type="button" title="恢复到示例内容">重置示例</button>
+      </div>
+    </div>
+
+    <section class="layout">
+      <aside class="composer">
+        <h2 class="section-title">记一件事</h2>
+        <form id="itemForm">
+          <label>
+            标题
+            <input id="titleInput" required maxlength="60" placeholder="比如：京都买线香" />
+          </label>
+          <label>
+            放在哪
+            <select id="categoryInput">
+              <option value="together">想一起做</option>
+              <option value="buy">想让你买</option>
+              <option value="home">家里要处理</option>
+            </select>
+          </label>
+          <div class="row">
+            <label>
+              负责人
+              <select id="ownerInput">
+                <option value="我们">我们</option>
+                <option value="我">我</option>
+                <option value="男朋友">男朋友</option>
+              </select>
+            </label>
+            <label>
+              提醒
+              <input id="dueInput" maxlength="30" placeholder="这周 / 去日本时" />
+            </label>
+          </div>
+          <label>
+            备注
+            <textarea id="noteInput" maxlength="180" placeholder="链接、地址、品牌、为什么想要，都可以写在这里。"></textarea>
+          </label>
+          <button class="btn primary" type="submit">加入清单</button>
+        </form>
+      </aside>
+
+      <section>
+        <div class="filters" aria-label="筛选">
+          <button class="chip active" type="button" data-filter="all">全部</button>
+          <button class="chip" type="button" data-filter="open">未完成</button>
+          <button class="chip" type="button" data-filter="done">已完成</button>
+          <button class="chip" type="button" data-filter="男朋友">男朋友负责</button>
+          <button class="chip" type="button" data-filter="我们">一起</button>
+        </div>
+        <div class="columns" id="columns"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="shareDialog">
+    <section class="share-panel">
+      <h2 class="section-title" id="dialogTitle">分享清单</h2>
+      <p class="subtle" id="dialogHelp">复制下面的链接发给对方，对方打开后会看到同一份当前清单。</p>
+      <textarea id="shareText" spellcheck="false"></textarea>
+      <div class="dialog-actions">
+        <button class="btn" id="closeDialog" type="button">关闭</button>
+        <button class="btn primary" id="copyShare" type="button">复制</button>
+      </div>
+    </section>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const storageKey = "coupleTinyErrands.v1";
+
+    const categories = [
+      { id: "together", title: "想一起做" },
+      { id: "buy", title: "想让你买" },
+      { id: "home", title: "家里要处理" }
+    ];
+
+    const starterItems = [
+      {
+        id: crypto.randomUUID(),
+        title: "去京都买线香",
+        category: "together",
+        owner: "我们",
+        due: "下次去日本",
+        note: "可以提前存几家店，想买干净一点、木质一点的味道。",
+        status: "想想"
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "乔治队长的咖啡豆",
+        category: "buy",
+        owner: "男朋友",
+        due: "这周",
+        note: "如果路过或者下单方便，就买一包最近适合手冲的。",
+        status: "已安排"
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "换制冰机",
+        category: "home",
+        owner: "男朋友",
+        due: "周日",
+        note: "看看容量、清洗难度和噪音，不要太占台面。",
+        status: "想想"
+      }
+    ];
+
+    let importedFromHash = false;
+    let items = loadItems();
+    let activeFilter = "all";
+
+    const columnsEl = document.querySelector("#columns");
+    const form = document.querySelector("#itemForm");
+    const shareDialog = document.querySelector("#shareDialog");
+    const shareText = document.querySelector("#shareText");
+    const dialogTitle = document.querySelector("#dialogTitle");
+    const dialogHelp = document.querySelector("#dialogHelp");
+    const toast = document.querySelector("#toast");
+
+    function loadItems() {
+      const hashData = new URLSearchParams(location.hash.slice(1)).get("list");
+      if (hashData) {
+        try {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(hashData))));
+          if (Array.isArray(decoded)) {
+            localStorage.setItem(storageKey, JSON.stringify(decoded));
+            history.replaceState(null, "", location.pathname);
+            importedFromHash = true;
+            return decoded;
+          }
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return starterItems;
+
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : starterItems;
+      } catch (error) {
+        return starterItems;
+      }
+    }
+
+    function saveItems() {
+      localStorage.setItem(storageKey, JSON.stringify(items));
+    }
+
+    function filteredItems(categoryId) {
+      return items.filter((item) => {
+        if (item.category !== categoryId) return false;
+        if (activeFilter === "all") return true;
+        if (activeFilter === "open") return item.status !== "已完成";
+        if (activeFilter === "done") return item.status === "已完成";
+        return item.owner === activeFilter;
+      });
+    }
+
+    function render() {
+      columnsEl.innerHTML = categories.map((category) => {
+        const list = filteredItems(category.id);
+        const cards = list.map(renderCard).join("");
+        return `
+          <article class="column">
+            <header>
+              <h2>${category.title}</h2>
+              <span class="count">${list.length}</span>
+            </header>
+            <div class="cards">
+              ${cards || `<div class="empty">这里还空着。<br>等一个新的念头落下来。</div>`}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderCard(item) {
+      const doneClass = item.status === "已完成" ? " done" : "";
+      return `
+        <article class="card${doneClass}" data-id="${item.id}">
+          <div class="card-top">
+            <h3>${escapeHtml(item.title)}</h3>
+            <button class="icon-btn" type="button" data-action="delete" title="删除">×</button>
+          </div>
+          <div class="meta">
+            <span class="pill owner">${escapeHtml(item.owner)}</span>
+            ${item.due ? `<span class="pill due">${escapeHtml(item.due)}</span>` : ""}
+            <span class="pill">${escapeHtml(item.status)}</span>
+          </div>
+          ${item.note ? `<p class="note">${linkify(escapeHtml(item.note))}</p>` : ""}
+          <div class="card-actions">
+            <select class="status-select" data-action="status" aria-label="状态">
+              ${["想想", "已安排", "已买/已做", "先搁置", "已完成"].map((status) => `
+                <option value="${status}" ${item.status === status ? "selected" : ""}>${status}</option>
+              `).join("")}
+            </select>
+            <button class="btn" type="button" data-action="done">${item.status === "已完成" ? "取消完成" : "完成"}</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function linkify(value) {
+      return value.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noreferrer">$1</a>');
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function exportText() {
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(items))));
+      return `${location.origin}${location.pathname}#list=${encoded}`;
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const newItem = {
+        id: crypto.randomUUID(),
+        title: document.querySelector("#titleInput").value.trim(),
+        category: document.querySelector("#categoryInput").value,
+        owner: document.querySelector("#ownerInput").value,
+        due: document.querySelector("#dueInput").value.trim(),
+        note: document.querySelector("#noteInput").value.trim(),
+        status: "想想"
+      };
+
+      if (!newItem.title) return;
+      items.unshift(newItem);
+      saveItems();
+      form.reset();
+      render();
+      showToast("已加入清单");
+    });
+
+    columnsEl.addEventListener("click", (event) => {
+      const action = event.target.dataset.action;
+      if (!action) return;
+      const card = event.target.closest(".card");
+      const item = items.find((entry) => entry.id === card.dataset.id);
+      if (!item) return;
+
+      if (action === "delete") {
+        items = items.filter((entry) => entry.id !== item.id);
+        showToast("已删除");
+      }
+
+      if (action === "done") {
+        item.status = item.status === "已完成" ? "想想" : "已完成";
+        showToast(item.status === "已完成" ? "完成了" : "已改回未完成");
+      }
+
+      saveItems();
+      render();
+    });
+
+    columnsEl.addEventListener("change", (event) => {
+      if (event.target.dataset.action !== "status") return;
+      const card = event.target.closest(".card");
+      const item = items.find((entry) => entry.id === card.dataset.id);
+      if (!item) return;
+      item.status = event.target.value;
+      saveItems();
+      render();
+    });
+
+    document.querySelectorAll(".chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        activeFilter = chip.dataset.filter;
+        document.querySelectorAll(".chip").forEach((item) => item.classList.remove("active"));
+        chip.classList.add("active");
+        render();
+      });
+    });
+
+    document.querySelector("#shareButton").addEventListener("click", () => {
+      dialogTitle.textContent = "分享清单";
+      dialogHelp.textContent = "复制下面的链接发给对方，对方打开后会看到同一份当前清单。";
+      document.querySelector("#copyShare").textContent = "复制";
+      shareText.value = exportText();
+      shareDialog.showModal();
+      shareText.select();
+    });
+
+    document.querySelector("#importButton").addEventListener("click", () => {
+      dialogTitle.textContent = "导入清单";
+      dialogHelp.textContent = "把对方发来的分享链接或完整内容粘在这里，然后点导入。";
+      shareText.value = "";
+      shareDialog.showModal();
+      shareText.focus();
+      document.querySelector("#copyShare").textContent = "导入";
+    });
+
+    document.querySelector("#copyShare").addEventListener("click", async () => {
+      if (document.querySelector("#copyShare").textContent === "导入") {
+        const value = shareText.value.trim();
+        const hash = value.includes("#list=") ? value.split("#list=")[1] : value;
+        try {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(hash.replace(/^list=/, "")))));
+          if (!Array.isArray(decoded)) throw new Error("Invalid list");
+          items = decoded;
+          saveItems();
+          render();
+          shareDialog.close();
+          showToast("已导入");
+        } catch (error) {
+          showToast("导入失败，请检查内容");
+        }
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareText.value);
+      showToast("已复制分享链接");
+    });
+
+    document.querySelector("#closeDialog").addEventListener("click", () => {
+      shareDialog.close();
+    });
+
+    document.querySelector("#resetButton").addEventListener("click", () => {
+      items = starterItems.map((item) => ({ ...item, id: crypto.randomUUID() }));
+      saveItems();
+      activeFilter = "all";
+      document.querySelectorAll(".chip").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
+      render();
+      showToast("已恢复示例");
+    });
+
+    render();
+    if (importedFromHash) showToast("已导入分享清单");
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>
