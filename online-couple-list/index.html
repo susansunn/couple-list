@@ -528,6 +528,18 @@
                 <input id="dueInput" maxlength="30" placeholder="这周 / 去日本时" />
               </label>
             </div>
+            <label>
+              什么时候
+              <select id="horizonInput">
+                <option value="今晚">今晚</option>
+                <option value="这周">这周</option>
+                <option value="本月">本月</option>
+                <option value="8月">8月</option>
+                <option value="今年">今年</option>
+                <option value="未来想去">未来想去</option>
+                <option value="随时">随时</option>
+              </select>
+            </label>
             <div class="row">
               <label>
                 日期
@@ -557,6 +569,10 @@
               <button class="chip" type="button" data-filter="done">已完成</button>
               <button class="chip" type="button" data-filter="男朋友">男朋友负责</button>
               <button class="chip" type="button" data-filter="我们">一起</button>
+              <button class="chip" type="button" data-filter="今晚">今晚</button>
+              <button class="chip" type="button" data-filter="这周">这周</button>
+              <button class="chip" type="button" data-filter="今年">今年</button>
+              <button class="chip" type="button" data-filter="未来想去">未来</button>
             </div>
             <div class="stats" id="stats"></div>
           </div>
@@ -597,6 +613,7 @@
         category: "together",
         owner: "我们",
         due: "下次去日本",
+        horizon: "未来想去",
         date: "",
         time: "",
         note: "可以提前存几家店，想买干净一点、木质一点的味道。",
@@ -608,6 +625,7 @@
         category: "buy",
         owner: "男朋友",
         due: "这周",
+        horizon: "这周",
         date: "",
         time: "",
         note: "如果路过或者下单方便，就买一包最近适合手冲的。",
@@ -619,9 +637,46 @@
         category: "home",
         owner: "男朋友",
         due: "周日",
+        horizon: "这周",
         date: "",
         time: "",
         note: "看看容量、清洗难度和噪音，不要太占台面。",
+        status: "想想"
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "今晚要一起骑车",
+        category: "together",
+        owner: "我们",
+        due: "今晚",
+        horizon: "今晚",
+        date: "",
+        time: "",
+        note: "不用骑很远，主要是一起出去吹吹风。",
+        status: "想想"
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "这周日一起吃小龙虾",
+        category: "together",
+        owner: "我们",
+        due: "周日",
+        horizon: "这周",
+        date: "",
+        time: "",
+        note: "想找一家味道重一点、不要太吵的。",
+        status: "想想"
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "8月骑行青海湖",
+        category: "together",
+        owner: "我们",
+        due: "8月",
+        horizon: "8月",
+        date: "",
+        time: "",
+        note: "先记着路线、装备和大概假期。",
         status: "想想"
       }
     ];
@@ -648,6 +703,7 @@
         category: item.category || "together",
         owner: item.owner || "我们",
         due: item.due || "",
+        horizon: item.horizon || item.due || "随时",
         date: item.date || "",
         time: item.time || "",
         note: item.note || "",
@@ -693,7 +749,7 @@
         if (activeFilter === "all") return true;
         if (activeFilter === "open") return item.status !== "已完成";
         if (activeFilter === "done") return item.status === "已完成";
-        return item.owner === activeFilter;
+        return item.owner === activeFilter || item.horizon === activeFilter;
       });
     }
 
@@ -727,6 +783,7 @@
           </div>
           <div class="meta">
             <span class="pill owner">${escapeHtml(item.owner)}</span>
+            ${item.horizon ? `<span class="pill">${escapeHtml(item.horizon)}</span>` : ""}
             ${item.due ? `<span class="pill due">${escapeHtml(item.due)}</span>` : ""}
             ${dateLabel ? `<span class="pill notify">${escapeHtml(dateLabel)}</span>` : ""}
             <span class="pill">${escapeHtml(item.status)}</span>
@@ -859,6 +916,7 @@
         category: document.querySelector("#categoryInput").value,
         owner: document.querySelector("#ownerInput").value,
         due: document.querySelector("#dueInput").value.trim(),
+        horizon: document.querySelector("#horizonInput").value,
         date: document.querySelector("#dateInput").value,
         time: document.querySelector("#timeInput").value,
         note: document.querySelector("#noteInput").value.trim(),
