@@ -232,6 +232,17 @@
       align-items: center;
     }
 
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    .sync-dot.ready { background: var(--sage); }
+    .sync-dot.error { background: var(--rose); }
+
     .columns {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -554,7 +565,7 @@
               <textarea id="noteInput" maxlength="180" placeholder="链接、地址、品牌、为什么想要，都可以写在这里。"></textarea>
             </label>
             <div class="composer-footer">
-              <p class="hint">有日期的事项可以加入系统日历；开启提醒后，新增时会弹出小通知。</p>
+              <p class="hint">清单会同步到云端；有日期的事项可以加入系统日历。</p>
               <button class="btn primary" type="submit">加入清单</button>
             </div>
           </form>
@@ -596,8 +607,13 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const storageKey = "coupleTinyErrands.v2";
+    const storageKey = "coupleTinyErrands.v3";
     const legacyStorageKey = "coupleTinyErrands.v1";
+    const cloudConfig = {
+      url: "https://hkaprwjldivpksgbvcne.supabase.co",
+      key: "sb_publishable_pH_vmP8hcFpTRCKsqS9vgA_LpREY3ZO",
+      table: "couple_items"
+    };
 
     const categories = [
       { id: "now", title: "现在" },
@@ -616,7 +632,7 @@
         date: "",
         time: "",
         note: "可以提前存几家店，想买干净一点、木质一点的味道。",
-        status: "想想"
+        status: "先记着"
       },
       {
         id: crypto.randomUUID(),
@@ -640,7 +656,7 @@
         date: "",
         time: "",
         note: "看看容量、清洗难度和噪音，不要太占台面。",
-        status: "想想"
+        status: "先记着"
       },
       {
         id: crypto.randomUUID(),
@@ -652,7 +668,7 @@
         date: "",
         time: "",
         note: "不用骑很远，主要是一起出去吹吹风。",
-        status: "想想"
+        status: "先记着"
       },
       {
         id: crypto.randomUUID(),
@@ -664,7 +680,7 @@
         date: "",
         time: "",
         note: "想找一家味道重一点、不要太吵的。",
-        status: "想想"
+        status: "先记着"
       },
       {
         id: crypto.randomUUID(),
@@ -676,13 +692,16 @@
         date: "",
         time: "",
         note: "先记着路线、装备和大概假期。",
-        status: "想想"
+        status: "先记着"
       }
     ];
 
     let importedFromHash = false;
     let items = loadItems();
     let activeFilter = "all";
+    let cloudReady = false;
+    let cloudBusy = false;
+    let lastCloudError = "";
 
     const columnsEl = document.querySelector("#columns");
     const statsEl = document.querySelector("#stats");
@@ -706,8 +725,14 @@
         date: item.date || "",
         time: item.time || "",
         note: item.note || "",
-        status: item.status || "想想"
+        status: normalizeStatus(item.status)
       };
+    }
+
+    function normalizeStatus(status) {
+      if (!status || status === "想想") return "先记着";
+      if (status === "已买/已做") return "已完成";
+      return status;
     }
 
     function migrateTempo(value) {
@@ -750,6 +775,98 @@
       localStorage.setItem(storageKey, JSON.stringify(items));
     }
 
+    async function cloudRequest(path = "", options = {}) {
+      const response = await fetch(`${cloudConfig.url}/rest/v1/${cloudConfig.table}${path}`, {
+        ...options,
+        headers: {
+          apikey: cloudConfig.key,
+          Authorization: `Bearer ${cloudConfig.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          ...(options.headers || {})
+        }
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Cloud request failed: ${response.status}`);
+      }
+
+      if (response.status === 204) return null;
+      return response.json();
+    }
+
+    function toCloudItem(item) {
+      const normalized = normalizeItem(item);
+      return {
+        id: normalized.id,
+        title: normalized.title,
+        category: normalized.category,
+        owner: normalized.owner,
+        due: normalized.due,
+        tempo: normalized.tempo,
+        date: normalized.date,
+        time: normalized.time,
+        note: normalized.note,
+        status: normalized.status
+      };
+    }
+
+    async function syncFromCloud({ seedIfEmpty = false } = {}) {
+      if (cloudBusy) return;
+      cloudBusy = true;
+      try {
+        const rows = await cloudRequest("?select=*&order=created_at.desc");
+        cloudReady = true;
+        lastCloudError = "";
+
+        if (Array.isArray(rows) && rows.length) {
+          items = rows.map(normalizeItem);
+          saveItems();
+          render();
+          return;
+        }
+
+        if (seedIfEmpty && items.length) {
+          await cloudRequest("", {
+            method: "POST",
+            body: JSON.stringify(items.map(toCloudItem))
+          });
+          await syncFromCloud();
+          return;
+        }
+
+        render();
+      } catch (error) {
+        cloudReady = false;
+        lastCloudError = error.message || "云同步暂时不可用";
+        render();
+      } finally {
+        cloudBusy = false;
+      }
+    }
+
+    async function createCloudItem(item) {
+      const rows = await cloudRequest("", {
+        method: "POST",
+        body: JSON.stringify(toCloudItem(item))
+      });
+      return Array.isArray(rows) && rows[0] ? normalizeItem(rows[0]) : item;
+    }
+
+    async function updateCloudItem(item) {
+      await cloudRequest(`?id=eq.${encodeURIComponent(item.id)}`, {
+        method: "PATCH",
+        body: JSON.stringify(toCloudItem(item))
+      });
+    }
+
+    async function deleteCloudItem(id) {
+      await cloudRequest(`?id=eq.${encodeURIComponent(id)}`, {
+        method: "DELETE"
+      });
+    }
+
     function filteredItems(categoryId) {
       return items.filter((item) => {
         if (bucketFor(item) !== categoryId) return false;
@@ -767,7 +884,9 @@
     }
 
     function render() {
-      statsEl.textContent = `${items.filter((item) => item.status !== "已完成").length} 件未完成`;
+      const cloudLabel = cloudReady ? "云端已同步" : lastCloudError ? "等待云端表" : "正在同步";
+      const dotClass = cloudReady ? "ready" : lastCloudError ? "error" : "";
+      statsEl.innerHTML = `<span class="sync-dot ${dotClass}"></span><span>${cloudLabel}</span><span>${items.filter((item) => item.status !== "已完成").length} 件未完成</span>`;
       columnsEl.innerHTML = categories.map((category) => {
         const list = filteredItems(category.id);
         const cards = list.map(renderCard).join("");
@@ -805,7 +924,7 @@
           ${item.note ? `<p class="note">${linkify(escapeHtml(item.note))}</p>` : ""}
           <div class="card-actions">
             <select class="status-select" data-action="status" aria-label="状态">
-              ${["想想", "已安排", "已买/已做", "先搁置", "已完成"].map((status) => `
+              ${["先记着", "想安排", "已安排", "先搁置", "已完成"].map((status) => `
                 <option value="${status}" ${item.status === status ? "selected" : ""}>${status}</option>
               `).join("")}
             </select>
@@ -933,7 +1052,7 @@
         .replaceAll("\n", "\\n");
     }
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const newItem = {
         id: crypto.randomUUID(),
@@ -945,7 +1064,7 @@
         date: document.querySelector("#dateInput").value,
         time: document.querySelector("#timeInput").value,
         note: document.querySelector("#noteInput").value.trim(),
-        status: "想想"
+        status: "先记着"
       };
 
       if (!newItem.title) return;
@@ -954,9 +1073,21 @@
       form.reset();
       render();
       notifyNewItem(newItem);
+      try {
+        const cloudItem = await createCloudItem(newItem);
+        items = items.map((item) => item.id === newItem.id ? cloudItem : item);
+        saveItems();
+        cloudReady = true;
+        lastCloudError = "";
+        render();
+      } catch (error) {
+        cloudReady = false;
+        lastCloudError = error.message || "新增后云同步失败";
+        render();
+      }
     });
 
-    columnsEl.addEventListener("click", (event) => {
+    columnsEl.addEventListener("click", async (event) => {
       const action = event.target.dataset.action;
       if (!action) return;
       const card = event.target.closest(".card");
@@ -966,10 +1097,22 @@
       if (action === "delete") {
         items = items.filter((entry) => entry.id !== item.id);
         showToast("已删除");
+        saveItems();
+        render();
+        try {
+          await deleteCloudItem(item.id);
+          cloudReady = true;
+          lastCloudError = "";
+        } catch (error) {
+          cloudReady = false;
+          lastCloudError = error.message || "删除后云同步失败";
+        }
+        render();
+        return;
       }
 
       if (action === "done") {
-        item.status = item.status === "已完成" ? "想想" : "已完成";
+        item.status = item.status === "已完成" ? "先记着" : "已完成";
         showToast(item.status === "已完成" ? "完成了" : "已改回未完成");
       }
 
@@ -979,15 +1122,35 @@
 
       saveItems();
       render();
+      if (action === "done") {
+        try {
+          await updateCloudItem(item);
+          cloudReady = true;
+          lastCloudError = "";
+        } catch (error) {
+          cloudReady = false;
+          lastCloudError = error.message || "状态云同步失败";
+        }
+        render();
+      }
     });
 
-    columnsEl.addEventListener("change", (event) => {
+    columnsEl.addEventListener("change", async (event) => {
       if (event.target.dataset.action !== "status") return;
       const card = event.target.closest(".card");
       const item = items.find((entry) => entry.id === card.dataset.id);
       if (!item) return;
       item.status = event.target.value;
       saveItems();
+      render();
+      try {
+        await updateCloudItem(item);
+        cloudReady = true;
+        lastCloudError = "";
+      } catch (error) {
+        cloudReady = false;
+        lastCloudError = error.message || "状态云同步失败";
+      }
       render();
     });
 
@@ -1030,6 +1193,14 @@
           items = decoded.map(normalizeItem);
           saveItems();
           render();
+          if (cloudReady) {
+            await cloudRequest("", {
+              method: "POST",
+              headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+              body: JSON.stringify(items.map(toCloudItem))
+            });
+            await syncFromCloud();
+          }
           shareDialog.close();
           showToast("已导入");
         } catch (error) {
@@ -1048,6 +1219,8 @@
 
     render();
     if (importedFromHash) showToast("已导入分享清单");
+    syncFromCloud({ seedIfEmpty: true });
+    setInterval(() => syncFromCloud(), 5000);
     if ("Notification" in window && Notification.permission === "granted") {
       notifyButton.textContent = "提醒已开启";
     }
