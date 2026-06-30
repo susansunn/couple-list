@@ -512,6 +512,8 @@
                 <option value="together">想一起做</option>
                 <option value="buy">想让你买</option>
                 <option value="home">家里要处理</option>
+                <option value="place">想去的地方</option>
+                <option value="care">想被照顾</option>
               </select>
             </label>
             <div class="row">
@@ -529,15 +531,12 @@
               </label>
             </div>
             <label>
-              什么时候
-              <select id="horizonInput">
-                <option value="今晚">今晚</option>
-                <option value="这周">这周</option>
-                <option value="本月">本月</option>
-                <option value="8月">8月</option>
-                <option value="今年">今年</option>
-                <option value="未来想去">未来想去</option>
-                <option value="随时">随时</option>
+              期待感
+              <select id="tempoInput">
+                <option value="马上">马上</option>
+                <option value="近期">近期</option>
+                <option value="计划中">计划中</option>
+                <option value="心愿">心愿</option>
               </select>
             </label>
             <div class="row">
@@ -569,10 +568,10 @@
               <button class="chip" type="button" data-filter="done">已完成</button>
               <button class="chip" type="button" data-filter="男朋友">男朋友负责</button>
               <button class="chip" type="button" data-filter="我们">一起</button>
-              <button class="chip" type="button" data-filter="今晚">今晚</button>
-              <button class="chip" type="button" data-filter="这周">这周</button>
-              <button class="chip" type="button" data-filter="今年">今年</button>
-              <button class="chip" type="button" data-filter="未来想去">未来</button>
+              <button class="chip" type="button" data-filter="马上">马上</button>
+              <button class="chip" type="button" data-filter="近期">近期</button>
+              <button class="chip" type="button" data-filter="计划中">计划中</button>
+              <button class="chip" type="button" data-filter="心愿">心愿</button>
             </div>
             <div class="stats" id="stats"></div>
           </div>
@@ -601,19 +600,19 @@
     const legacyStorageKey = "coupleTinyErrands.v1";
 
     const categories = [
-      { id: "together", title: "想一起做" },
-      { id: "buy", title: "想让你买" },
-      { id: "home", title: "家里要处理" }
+      { id: "now", title: "现在" },
+      { id: "soon", title: "最近" },
+      { id: "later", title: "以后" }
     ];
 
     const starterItems = [
       {
         id: crypto.randomUUID(),
         title: "去京都买线香",
-        category: "together",
+        category: "place",
         owner: "我们",
-        due: "下次去日本",
-        horizon: "未来想去",
+        due: "今年想安排",
+        tempo: "心愿",
         date: "",
         time: "",
         note: "可以提前存几家店，想买干净一点、木质一点的味道。",
@@ -624,8 +623,8 @@
         title: "乔治队长的咖啡豆",
         category: "buy",
         owner: "男朋友",
-        due: "这周",
-        horizon: "这周",
+        due: "最近",
+        tempo: "近期",
         date: "",
         time: "",
         note: "如果路过或者下单方便，就买一包最近适合手冲的。",
@@ -636,8 +635,8 @@
         title: "换制冰机",
         category: "home",
         owner: "男朋友",
-        due: "周日",
-        horizon: "这周",
+        due: "最近找时间",
+        tempo: "近期",
         date: "",
         time: "",
         note: "看看容量、清洗难度和噪音，不要太占台面。",
@@ -649,7 +648,7 @@
         category: "together",
         owner: "我们",
         due: "今晚",
-        horizon: "今晚",
+        tempo: "马上",
         date: "",
         time: "",
         note: "不用骑很远，主要是一起出去吹吹风。",
@@ -660,8 +659,8 @@
         title: "这周日一起吃小龙虾",
         category: "together",
         owner: "我们",
-        due: "周日",
-        horizon: "这周",
+        due: "这个周末",
+        tempo: "近期",
         date: "",
         time: "",
         note: "想找一家味道重一点、不要太吵的。",
@@ -672,8 +671,8 @@
         title: "8月骑行青海湖",
         category: "together",
         owner: "我们",
-        due: "8月",
-        horizon: "8月",
+        due: "夏天",
+        tempo: "计划中",
         date: "",
         time: "",
         note: "先记着路线、装备和大概假期。",
@@ -703,12 +702,20 @@
         category: item.category || "together",
         owner: item.owner || "我们",
         due: item.due || "",
-        horizon: item.horizon || item.due || "随时",
+        tempo: item.tempo || migrateTempo(item.horizon || item.due),
         date: item.date || "",
         time: item.time || "",
         note: item.note || "",
         status: item.status || "想想"
       };
+    }
+
+    function migrateTempo(value) {
+      if (["马上", "近期", "计划中", "心愿"].includes(value)) return value;
+      if (["今晚", "今天", "明天"].includes(value)) return "马上";
+      if (["这周", "本月", "最近", "周末"].includes(value)) return "近期";
+      if (["8月", "夏天", "秋天", "冬天", "春天"].includes(value)) return "计划中";
+      return "心愿";
     }
 
     function loadItems() {
@@ -745,12 +752,18 @@
 
     function filteredItems(categoryId) {
       return items.filter((item) => {
-        if (item.category !== categoryId) return false;
+        if (bucketFor(item) !== categoryId) return false;
         if (activeFilter === "all") return true;
         if (activeFilter === "open") return item.status !== "已完成";
         if (activeFilter === "done") return item.status === "已完成";
-        return item.owner === activeFilter || item.horizon === activeFilter;
+        return item.owner === activeFilter || item.tempo === activeFilter;
       });
+    }
+
+    function bucketFor(item) {
+      if (item.tempo === "马上") return "now";
+      if (item.tempo === "近期") return "soon";
+      return "later";
     }
 
     function render() {
@@ -783,7 +796,8 @@
           </div>
           <div class="meta">
             <span class="pill owner">${escapeHtml(item.owner)}</span>
-            ${item.horizon ? `<span class="pill">${escapeHtml(item.horizon)}</span>` : ""}
+            ${item.tempo ? `<span class="pill">${escapeHtml(item.tempo)}</span>` : ""}
+            <span class="pill">${escapeHtml(categoryLabel(item.category))}</span>
             ${item.due ? `<span class="pill due">${escapeHtml(item.due)}</span>` : ""}
             ${dateLabel ? `<span class="pill notify">${escapeHtml(dateLabel)}</span>` : ""}
             <span class="pill">${escapeHtml(item.status)}</span>
@@ -800,6 +814,17 @@
           </div>
         </article>
       `;
+    }
+
+    function categoryLabel(category) {
+      const labels = {
+        together: "一起做",
+        buy: "想让你买",
+        home: "家里",
+        place: "想去",
+        care: "照顾我"
+      };
+      return labels[category] || category;
     }
 
     function escapeHtml(value) {
@@ -916,7 +941,7 @@
         category: document.querySelector("#categoryInput").value,
         owner: document.querySelector("#ownerInput").value,
         due: document.querySelector("#dueInput").value.trim(),
-        horizon: document.querySelector("#horizonInput").value,
+        tempo: document.querySelector("#tempoInput").value,
         date: document.querySelector("#dateInput").value,
         time: document.querySelector("#timeInput").value,
         note: document.querySelector("#noteInput").value.trim(),
