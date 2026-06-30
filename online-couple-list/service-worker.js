@@ -1,4 +1,4 @@
-const cacheName = "couple-list-v2";
+const cacheName = "couple-list-v3";
 const assets = [
   "./",
   "./index.html",
