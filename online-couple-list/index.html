@@ -2,112 +2,109 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#6d8a79" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f8f5ef" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="小差事" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <title>我们的小差事</title>
   <style>
     :root {
-      --ink: #292521;
-      --muted: #776f66;
-      --line: #ddd4c7;
-      --paper: #fffaf1;
-      --panel: #ffffff;
-      --mist: #edf5f2;
-      --sage: #6d8a79;
-      --rose: #c97878;
-      --gold: #bd8438;
-      --blue: #5f7f9b;
-      --shadow: 0 18px 45px rgba(55, 46, 35, .13);
+      --bg: #f8f5ef;
+      --surface: #fffdf8;
+      --surface-2: #f0f5f2;
+      --ink: #211f1b;
+      --muted: #716c63;
+      --line: #e3ddd2;
+      --sage: #647d6f;
+      --sage-dark: #465f53;
+      --rose: #b87474;
+      --amber: #af7d38;
+      --blue: #617d97;
+      --shadow: 0 14px 38px rgba(42, 36, 28, .09);
       --radius: 8px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
+
+    html { background: var(--bg); }
 
     body {
       margin: 0;
       min-height: 100vh;
       color: var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        linear-gradient(120deg, rgba(237, 245, 242, .88), rgba(255, 250, 241, .94) 46%, rgba(247, 232, 218, .9)),
-        var(--paper);
+        radial-gradient(circle at top left, rgba(221, 235, 229, .8), transparent 34rem),
+        linear-gradient(135deg, #f8f5ef 0%, #fbf8f2 46%, #f1eee6 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
+    button, input, textarea, select { font: inherit; }
 
     button {
       border: 0;
       cursor: pointer;
     }
 
+    a { color: var(--sage-dark); }
+
     .app {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1120px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 28px 0 42px;
+      padding: calc(18px + env(safe-area-inset-top)) 0 40px;
     }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      align-items: flex-end;
-      margin-bottom: 22px;
-    }
-
-    .brand {
+    .shell {
       display: grid;
-      gap: 8px;
+      gap: 16px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      padding: 18px 0 4px;
+    }
+
+    .kicker {
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(30px, 5vw, 52px);
-      line-height: 1.02;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: .98;
       letter-spacing: 0;
     }
 
-    .subtle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.65;
-    }
-
-    .top-actions {
+    .hero-actions {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 8px;
     }
 
     .btn {
+      min-height: 40px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 40px;
+      gap: 7px;
+      padding: 0 13px;
       border-radius: var(--radius);
-      padding: 0 14px;
       color: var(--ink);
-      background: var(--panel);
+      background: rgba(255, 253, 248, .82);
       box-shadow: inset 0 0 0 1px var(--line);
-      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
       white-space: nowrap;
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: inset 0 0 0 1px #cbbdad, 0 10px 22px rgba(55, 46, 35, .08);
+      box-shadow: inset 0 0 0 1px #d0c8bb, 0 10px 24px rgba(42, 36, 28, .08);
     }
 
     .btn.primary {
@@ -116,205 +113,221 @@
       box-shadow: none;
     }
 
-    .btn.warn {
-      color: #fff;
-      background: var(--rose);
-      box-shadow: none;
+    .btn.subtle {
+      color: var(--muted);
+      background: transparent;
     }
 
-    .layout {
+    .main-grid {
       display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 18px;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 16px;
       align-items: start;
     }
 
-    .composer,
-    .share-panel {
-      background: rgba(255, 255, 255, .82);
-      border: 1px solid rgba(221, 212, 199, .82);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
     .composer {
-      padding: 18px;
       position: sticky;
-      top: 18px;
+      top: 16px;
+      padding: 14px;
+      border: 1px solid rgba(227, 221, 210, .88);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, .86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
     }
 
     .section-title {
-      margin: 0 0 14px;
-      font-size: 18px;
+      margin: 0 0 12px;
+      font-size: 17px;
+      line-height: 1.25;
     }
 
     form {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     label {
       display: grid;
       gap: 6px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
-    input,
-    textarea,
-    select {
+    input, textarea, select {
       width: 100%;
-      min-height: 42px;
+      min-height: 40px;
+      padding: 9px 10px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 10px 11px;
       color: var(--ink);
-      background: #fffdf9;
+      background: #fffefa;
       outline: none;
     }
 
     textarea {
-      min-height: 82px;
+      min-height: 76px;
       resize: vertical;
     }
 
-    input:focus,
-    textarea:focus,
-    select:focus {
+    input:focus, textarea:focus, select:focus {
       border-color: var(--sage);
-      box-shadow: 0 0 0 3px rgba(109, 138, 121, .18);
+      box-shadow: 0 0 0 3px rgba(100, 125, 111, .15);
     }
 
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .composer-footer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
       gap: 10px;
+      margin-bottom: 12px;
     }
 
     .filters {
       display: flex;
       flex-wrap: wrap;
-      gap: 9px;
-      margin-bottom: 14px;
+      gap: 7px;
     }
 
     .chip {
-      min-height: 34px;
-      padding: 0 11px;
+      min-height: 32px;
+      padding: 0 10px;
       border-radius: 999px;
       color: var(--muted);
-      background: rgba(255, 255, 255, .68);
-      box-shadow: inset 0 0 0 1px rgba(221, 212, 199, .9);
+      background: rgba(255, 253, 248, .68);
+      box-shadow: inset 0 0 0 1px rgba(227, 221, 210, .9);
     }
 
     .chip.active {
       color: #fff;
-      background: var(--blue);
+      background: var(--sage-dark);
       box-shadow: none;
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      align-items: center;
     }
 
     .columns {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .column {
-      min-height: 460px;
-      background: rgba(255, 255, 255, .54);
-      border: 1px solid rgba(221, 212, 199, .72);
+      min-height: 410px;
+      padding: 10px;
+      border: 1px solid rgba(227, 221, 210, .72);
       border-radius: var(--radius);
-      padding: 12px;
+      background: rgba(255, 253, 248, .42);
     }
 
     .column header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 9px;
+      padding: 0 2px;
     }
 
     .column h2 {
       margin: 0;
-      font-size: 17px;
+      font-size: 15px;
     }
 
     .count {
-      min-width: 28px;
-      height: 26px;
+      min-width: 25px;
+      height: 24px;
       display: inline-grid;
       place-items: center;
       border-radius: 999px;
       color: var(--muted);
       background: #fffaf1;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .cards {
       display: grid;
-      gap: 10px;
+      gap: 9px;
     }
 
     .card {
       display: grid;
-      gap: 10px;
-      padding: 13px;
+      gap: 9px;
+      padding: 12px;
+      border: 1px solid rgba(227, 221, 210, .86);
       border-radius: var(--radius);
-      background: var(--panel);
-      border: 1px solid rgba(221, 212, 199, .88);
-      box-shadow: 0 10px 24px rgba(55, 46, 35, .08);
+      background: var(--surface);
+      box-shadow: 0 8px 22px rgba(42, 36, 28, .07);
     }
 
-    .card.done {
-      opacity: .58;
-    }
+    .card.done { opacity: .56; }
 
     .card-top {
       display: flex;
-      gap: 10px;
+      gap: 9px;
       justify-content: space-between;
       align-items: flex-start;
     }
 
     .card h3 {
       margin: 0;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.35;
       overflow-wrap: anywhere;
     }
 
     .icon-btn {
-      width: 34px;
-      height: 34px;
+      width: 31px;
+      height: 31px;
       flex: 0 0 auto;
       display: inline-grid;
       place-items: center;
       border-radius: var(--radius);
       color: var(--muted);
-      background: #f8f3eb;
-      box-shadow: inset 0 0 0 1px rgba(221, 212, 199, .8);
-    }
-
-    .icon-btn:hover {
-      color: var(--ink);
-      background: #fff7e9;
+      background: #f5f0e8;
+      box-shadow: inset 0 0 0 1px rgba(227, 221, 210, .86);
     }
 
     .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 7px;
+      gap: 6px;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
-      min-height: 26px;
+      min-height: 24px;
       padding: 0 8px;
       border-radius: 999px;
       color: var(--muted);
-      background: #f6f1ea;
+      background: #f4efe7;
       font-size: 12px;
       overflow-wrap: anywhere;
     }
@@ -326,46 +339,51 @@
 
     .pill.due {
       color: #fff;
-      background: var(--gold);
+      background: var(--amber);
+    }
+
+    .pill.notify {
+      color: #fff;
+      background: var(--blue);
     }
 
     .note {
       margin: 0;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.52;
       font-size: 13px;
       overflow-wrap: anywhere;
     }
 
     .card-actions {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 7px;
       align-items: center;
     }
 
     .status-select {
-      min-height: 36px;
+      min-height: 35px;
       padding: 7px 9px;
       font-size: 13px;
     }
 
     .empty {
-      min-height: 120px;
+      min-height: 104px;
       display: grid;
       place-items: center;
-      padding: 18px;
-      border: 1px dashed #d5c9bb;
+      padding: 14px;
+      border: 1px dashed #d8d0c2;
       border-radius: var(--radius);
       color: var(--muted);
       text-align: center;
       line-height: 1.5;
-      background: rgba(255, 250, 241, .48);
-      font-size: 14px;
+      background: rgba(255, 253, 248, .48);
+      font-size: 13px;
     }
 
     dialog {
-      width: min(560px, calc(100% - 28px));
+      width: min(560px, calc(100% - 26px));
       border: 0;
       border-radius: var(--radius);
       padding: 0;
@@ -374,42 +392,48 @@
     }
 
     dialog::backdrop {
-      background: rgba(41, 37, 33, .34);
-      backdrop-filter: blur(4px);
+      background: rgba(33, 31, 27, .34);
+      backdrop-filter: blur(5px);
     }
 
-    .share-panel {
-      padding: 18px;
+    .modal {
+      padding: 16px;
+      border: 1px solid rgba(227, 221, 210, .9);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
 
-    .share-panel textarea {
-      min-height: 140px;
+    .modal textarea {
+      min-height: 132px;
+      margin-top: 10px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 12px;
     }
 
-    .dialog-actions {
+    .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      margin-top: 11px;
     }
 
     .toast {
       position: fixed;
       left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%) translateY(20px);
-      max-width: min(420px, calc(100% - 32px));
-      padding: 11px 14px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      z-index: 20;
+      transform: translateX(-50%) translateY(18px);
+      max-width: min(420px, calc(100% - 30px));
+      padding: 11px 13px;
       border-radius: var(--radius);
       color: #fff;
-      background: rgba(41, 37, 33, .92);
+      background: rgba(33, 31, 27, .92);
       opacity: 0;
       pointer-events: none;
       transition: opacity .18s ease, transform .18s ease;
       text-align: center;
-      line-height: 1.45;
+      line-height: 1.42;
       font-size: 14px;
     }
 
@@ -418,127 +442,136 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    @media (max-width: 920px) {
-      .topbar {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .top-actions {
-        justify-content: flex-start;
-      }
-
-      .layout {
+    @media (max-width: 930px) {
+      .hero {
         grid-template-columns: 1fr;
+        align-items: start;
       }
 
-      .composer {
-        position: static;
-      }
+      .hero-actions { justify-content: flex-start; }
 
-      .columns {
-        grid-template-columns: 1fr;
-      }
+      .main-grid { grid-template-columns: 1fr; }
 
-      .column {
-        min-height: 220px;
-      }
+      .composer { position: static; }
+
+      .columns { grid-template-columns: 1fr; }
+
+      .column { min-height: 190px; }
     }
 
     @media (max-width: 560px) {
       .app {
-        width: min(100% - 22px, 1180px);
-        padding-top: 18px;
+        width: min(100% - 20px, 1120px);
+        padding-top: calc(12px + env(safe-area-inset-top));
       }
 
+      .hero-actions,
+      .composer-footer,
       .row,
-      .card-actions {
+      .card-actions,
+      .modal-actions {
         grid-template-columns: 1fr;
-      }
-
-      .btn {
-        width: 100%;
-      }
-
-      .top-actions,
-      .dialog-actions {
         display: grid;
-        grid-template-columns: 1fr;
+      }
+
+      .hero-actions .btn,
+      .composer-footer .btn,
+      .card-actions .btn,
+      .modal-actions .btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <div class="topbar">
-      <div class="brand">
-        <h1>我们的小差事</h1>
-        <p class="subtle">把想去、想买、想提醒对方的事，都放在一个两个人看得见的小地方。</p>
-      </div>
-      <div class="top-actions">
-        <button class="btn" id="shareButton" type="button" title="生成可以发给对方的链接">分享</button>
-        <button class="btn" id="importButton" type="button" title="粘贴对方发来的内容">导入</button>
-        <button class="btn warn" id="resetButton" type="button" title="恢复到示例内容">重置示例</button>
-      </div>
-    </div>
+    <div class="shell">
+      <section class="hero">
+        <div>
+          <p class="kicker">给我们俩的生活小清单</p>
+          <h1>我们的小差事</h1>
+        </div>
+        <div class="hero-actions">
+          <button class="btn" id="notifyButton" type="button">开启提醒</button>
+          <button class="btn" id="shareButton" type="button">分享</button>
+          <button class="btn" id="importButton" type="button">导入</button>
+        </div>
+      </section>
 
-    <section class="layout">
-      <aside class="composer">
-        <h2 class="section-title">记一件事</h2>
-        <form id="itemForm">
-          <label>
-            标题
-            <input id="titleInput" required maxlength="60" placeholder="比如：京都买线香" />
-          </label>
-          <label>
-            放在哪
-            <select id="categoryInput">
-              <option value="together">想一起做</option>
-              <option value="buy">想让你买</option>
-              <option value="home">家里要处理</option>
-            </select>
-          </label>
-          <div class="row">
+      <section class="main-grid">
+        <aside class="composer">
+          <h2 class="section-title">记一件事</h2>
+          <form id="itemForm">
             <label>
-              负责人
-              <select id="ownerInput">
-                <option value="我们">我们</option>
-                <option value="我">我</option>
-                <option value="男朋友">男朋友</option>
+              标题
+              <input id="titleInput" required maxlength="60" placeholder="比如：京都买线香" />
+            </label>
+            <label>
+              放在哪
+              <select id="categoryInput">
+                <option value="together">想一起做</option>
+                <option value="buy">想让你买</option>
+                <option value="home">家里要处理</option>
               </select>
             </label>
+            <div class="row">
+              <label>
+                负责人
+                <select id="ownerInput">
+                  <option value="我们">我们</option>
+                  <option value="我">我</option>
+                  <option value="男朋友">男朋友</option>
+                </select>
+              </label>
+              <label>
+                提醒文案
+                <input id="dueInput" maxlength="30" placeholder="这周 / 去日本时" />
+              </label>
+            </div>
+            <div class="row">
+              <label>
+                日期
+                <input id="dateInput" type="date" />
+              </label>
+              <label>
+                时间
+                <input id="timeInput" type="time" />
+              </label>
+            </div>
             <label>
-              提醒
-              <input id="dueInput" maxlength="30" placeholder="这周 / 去日本时" />
+              备注
+              <textarea id="noteInput" maxlength="180" placeholder="链接、地址、品牌、为什么想要，都可以写在这里。"></textarea>
             </label>
-          </div>
-          <label>
-            备注
-            <textarea id="noteInput" maxlength="180" placeholder="链接、地址、品牌、为什么想要，都可以写在这里。"></textarea>
-          </label>
-          <button class="btn primary" type="submit">加入清单</button>
-        </form>
-      </aside>
+            <div class="composer-footer">
+              <p class="hint">有日期的事项可以加入系统日历；开启提醒后，新增时会弹出小通知。</p>
+              <button class="btn primary" type="submit">加入清单</button>
+            </div>
+          </form>
+        </aside>
 
-      <section>
-        <div class="filters" aria-label="筛选">
-          <button class="chip active" type="button" data-filter="all">全部</button>
-          <button class="chip" type="button" data-filter="open">未完成</button>
-          <button class="chip" type="button" data-filter="done">已完成</button>
-          <button class="chip" type="button" data-filter="男朋友">男朋友负责</button>
-          <button class="chip" type="button" data-filter="我们">一起</button>
-        </div>
-        <div class="columns" id="columns"></div>
+        <section>
+          <div class="toolbar">
+            <div class="filters" aria-label="筛选">
+              <button class="chip active" type="button" data-filter="all">全部</button>
+              <button class="chip" type="button" data-filter="open">未完成</button>
+              <button class="chip" type="button" data-filter="done">已完成</button>
+              <button class="chip" type="button" data-filter="男朋友">男朋友负责</button>
+              <button class="chip" type="button" data-filter="我们">一起</button>
+            </div>
+            <div class="stats" id="stats"></div>
+          </div>
+          <div class="columns" id="columns"></div>
+        </section>
       </section>
-    </section>
+    </div>
   </main>
 
   <dialog id="shareDialog">
-    <section class="share-panel">
+    <section class="modal">
       <h2 class="section-title" id="dialogTitle">分享清单</h2>
-      <p class="subtle" id="dialogHelp">复制下面的链接发给对方，对方打开后会看到同一份当前清单。</p>
+      <p class="hint" id="dialogHelp">复制下面的链接发给对方，对方打开后会看到同一份当前清单。</p>
       <textarea id="shareText" spellcheck="false"></textarea>
-      <div class="dialog-actions">
+      <div class="modal-actions">
         <button class="btn" id="closeDialog" type="button">关闭</button>
         <button class="btn primary" id="copyShare" type="button">复制</button>
       </div>
@@ -548,7 +581,8 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const storageKey = "coupleTinyErrands.v1";
+    const storageKey = "coupleTinyErrands.v2";
+    const legacyStorageKey = "coupleTinyErrands.v1";
 
     const categories = [
       { id: "together", title: "想一起做" },
@@ -563,6 +597,8 @@
         category: "together",
         owner: "我们",
         due: "下次去日本",
+        date: "",
+        time: "",
         note: "可以提前存几家店，想买干净一点、木质一点的味道。",
         status: "想想"
       },
@@ -572,6 +608,8 @@
         category: "buy",
         owner: "男朋友",
         due: "这周",
+        date: "",
+        time: "",
         note: "如果路过或者下单方便，就买一包最近适合手冲的。",
         status: "已安排"
       },
@@ -581,6 +619,8 @@
         category: "home",
         owner: "男朋友",
         due: "周日",
+        date: "",
+        time: "",
         note: "看看容量、清洗难度和噪音，不要太占台面。",
         status: "想想"
       }
@@ -591,12 +631,29 @@
     let activeFilter = "all";
 
     const columnsEl = document.querySelector("#columns");
+    const statsEl = document.querySelector("#stats");
     const form = document.querySelector("#itemForm");
     const shareDialog = document.querySelector("#shareDialog");
     const shareText = document.querySelector("#shareText");
     const dialogTitle = document.querySelector("#dialogTitle");
     const dialogHelp = document.querySelector("#dialogHelp");
+    const copyShare = document.querySelector("#copyShare");
     const toast = document.querySelector("#toast");
+    const notifyButton = document.querySelector("#notifyButton");
+
+    function normalizeItem(item) {
+      return {
+        id: item.id || crypto.randomUUID(),
+        title: item.title || "",
+        category: item.category || "together",
+        owner: item.owner || "我们",
+        due: item.due || "",
+        date: item.date || "",
+        time: item.time || "",
+        note: item.note || "",
+        status: item.status || "想想"
+      };
+    }
 
     function loadItems() {
       const hashData = new URLSearchParams(location.hash.slice(1)).get("list");
@@ -604,22 +661,23 @@
         try {
           const decoded = JSON.parse(decodeURIComponent(escape(atob(hashData))));
           if (Array.isArray(decoded)) {
-            localStorage.setItem(storageKey, JSON.stringify(decoded));
+            const normalized = decoded.map(normalizeItem);
+            localStorage.setItem(storageKey, JSON.stringify(normalized));
             history.replaceState(null, "", location.pathname);
             importedFromHash = true;
-            return decoded;
+            return normalized;
           }
         } catch (error) {
           console.warn(error);
         }
       }
 
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
       if (!saved) return starterItems;
 
       try {
         const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : starterItems;
+        return Array.isArray(parsed) ? parsed.map(normalizeItem) : starterItems;
       } catch (error) {
         return starterItems;
       }
@@ -640,6 +698,7 @@
     }
 
     function render() {
+      statsEl.textContent = `${items.filter((item) => item.status !== "已完成").length} 件未完成`;
       columnsEl.innerHTML = categories.map((category) => {
         const list = filteredItems(category.id);
         const cards = list.map(renderCard).join("");
@@ -659,6 +718,7 @@
 
     function renderCard(item) {
       const doneClass = item.status === "已完成" ? " done" : "";
+      const dateLabel = formatDateTime(item.date, item.time);
       return `
         <article class="card${doneClass}" data-id="${item.id}">
           <div class="card-top">
@@ -668,6 +728,7 @@
           <div class="meta">
             <span class="pill owner">${escapeHtml(item.owner)}</span>
             ${item.due ? `<span class="pill due">${escapeHtml(item.due)}</span>` : ""}
+            ${dateLabel ? `<span class="pill notify">${escapeHtml(dateLabel)}</span>` : ""}
             <span class="pill">${escapeHtml(item.status)}</span>
           </div>
           ${item.note ? `<p class="note">${linkify(escapeHtml(item.note))}</p>` : ""}
@@ -677,7 +738,8 @@
                 <option value="${status}" ${item.status === status ? "selected" : ""}>${status}</option>
               `).join("")}
             </select>
-            <button class="btn" type="button" data-action="done">${item.status === "已完成" ? "取消完成" : "完成"}</button>
+            ${item.date ? `<button class="btn" type="button" data-action="calendar">日历</button>` : ""}
+            <button class="btn" type="button" data-action="done">${item.status === "已完成" ? "取消" : "完成"}</button>
           </div>
         </article>
       `;
@@ -700,12 +762,93 @@
       toast.textContent = message;
       toast.classList.add("show");
       clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function formatDateTime(date, time) {
+      if (!date) return "";
+      const parts = date.split("-");
+      if (parts.length !== 3) return date;
+      const label = `${Number(parts[1])}月${Number(parts[2])}日`;
+      return time ? `${label} ${time}` : label;
+    }
+
+    function notifyNewItem(item) {
+      const body = `${item.title}${item.due ? " · " + item.due : ""}`;
+      showToast(`小噜妹新增一条需求！${item.title}`);
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+      new Notification("小噜妹新增一条需求！", {
+        body,
+        tag: `item-${item.id}`,
+        icon: "./icon.svg"
+      });
+    }
+
+    async function requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        showToast("这个浏览器暂时不支持网页通知");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        showToast("提醒已开启");
+        notifyButton.textContent = "提醒已开启";
+      } else {
+        showToast("提醒没有开启，可以稍后再试");
+      }
     }
 
     function exportText() {
       const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(items))));
       return `${location.origin}${location.pathname}#list=${encoded}`;
+    }
+
+    function toCalendarStamp(date, time) {
+      const safeTime = time || "09:00";
+      return `${date.replaceAll("-", "")}T${safeTime.replace(":", "")}00`;
+    }
+
+    function downloadCalendar(item) {
+      const start = toCalendarStamp(item.date, item.time);
+      const endHour = String(Math.min(Number((item.time || "09:00").slice(0, 2)) + 1, 23)).padStart(2, "0");
+      const end = toCalendarStamp(item.date, item.time ? `${endHour}:${item.time.slice(3, 5)}` : "10:00");
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Couple List//Tiny Errands//CN",
+        "BEGIN:VEVENT",
+        `UID:${item.id}@couple-list`,
+        `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
+        `DTSTART:${start}`,
+        `DTEND:${end}`,
+        `SUMMARY:${icsEscape(item.title)}`,
+        `DESCRIPTION:${icsEscape([item.owner, item.due, item.note].filter(Boolean).join(" · "))}`,
+        "BEGIN:VALARM",
+        "TRIGGER:-PT30M",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${icsEscape("小噜妹的提醒：" + item.title)}`,
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${item.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 24) || "reminder"}.ics`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("已生成日历提醒文件");
+    }
+
+    function icsEscape(value) {
+      return String(value)
+        .replaceAll("\\", "\\\\")
+        .replaceAll(",", "\\,")
+        .replaceAll(";", "\\;")
+        .replaceAll("\n", "\\n");
     }
 
     form.addEventListener("submit", (event) => {
@@ -716,6 +859,8 @@
         category: document.querySelector("#categoryInput").value,
         owner: document.querySelector("#ownerInput").value,
         due: document.querySelector("#dueInput").value.trim(),
+        date: document.querySelector("#dateInput").value,
+        time: document.querySelector("#timeInput").value,
         note: document.querySelector("#noteInput").value.trim(),
         status: "想想"
       };
@@ -725,7 +870,7 @@
       saveItems();
       form.reset();
       render();
-      showToast("已加入清单");
+      notifyNewItem(newItem);
     });
 
     columnsEl.addEventListener("click", (event) => {
@@ -743,6 +888,10 @@
       if (action === "done") {
         item.status = item.status === "已完成" ? "想想" : "已完成";
         showToast(item.status === "已完成" ? "完成了" : "已改回未完成");
+      }
+
+      if (action === "calendar") {
+        downloadCalendar(item);
       }
 
       saveItems();
@@ -768,10 +917,12 @@
       });
     });
 
+    notifyButton.addEventListener("click", requestNotificationPermission);
+
     document.querySelector("#shareButton").addEventListener("click", () => {
       dialogTitle.textContent = "分享清单";
       dialogHelp.textContent = "复制下面的链接发给对方，对方打开后会看到同一份当前清单。";
-      document.querySelector("#copyShare").textContent = "复制";
+      copyShare.textContent = "复制";
       shareText.value = exportText();
       shareDialog.showModal();
       shareText.select();
@@ -780,20 +931,20 @@
     document.querySelector("#importButton").addEventListener("click", () => {
       dialogTitle.textContent = "导入清单";
       dialogHelp.textContent = "把对方发来的分享链接或完整内容粘在这里，然后点导入。";
+      copyShare.textContent = "导入";
       shareText.value = "";
       shareDialog.showModal();
       shareText.focus();
-      document.querySelector("#copyShare").textContent = "导入";
     });
 
-    document.querySelector("#copyShare").addEventListener("click", async () => {
-      if (document.querySelector("#copyShare").textContent === "导入") {
+    copyShare.addEventListener("click", async () => {
+      if (copyShare.textContent === "导入") {
         const value = shareText.value.trim();
         const hash = value.includes("#list=") ? value.split("#list=")[1] : value;
         try {
           const decoded = JSON.parse(decodeURIComponent(escape(atob(hash.replace(/^list=/, "")))));
           if (!Array.isArray(decoded)) throw new Error("Invalid list");
-          items = decoded;
+          items = decoded.map(normalizeItem);
           saveItems();
           render();
           shareDialog.close();
@@ -812,17 +963,11 @@
       shareDialog.close();
     });
 
-    document.querySelector("#resetButton").addEventListener("click", () => {
-      items = starterItems.map((item) => ({ ...item, id: crypto.randomUUID() }));
-      saveItems();
-      activeFilter = "all";
-      document.querySelectorAll(".chip").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
-      render();
-      showToast("已恢复示例");
-    });
-
     render();
     if (importedFromHash) showToast("已导入分享清单");
+    if ("Notification" in window && Notification.permission === "granted") {
+      notifyButton.textContent = "提醒已开启";
+    }
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js").catch(() => {});
